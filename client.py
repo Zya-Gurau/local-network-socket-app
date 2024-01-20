@@ -40,8 +40,13 @@ try:
 except gaierror:
     print("ERROR - '{argv[1]}' does not exist")
     exit()
+
 except ValueError as err:
     print("ERROR -  " + str(err))
+    exit()
+
+except IndexError:
+    print("ERROR - Request must include exactly four parameters")
     exit()
 
 

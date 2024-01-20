@@ -28,6 +28,10 @@ except ValueError:
         print("ERROR - Port must be between 1024 and 64000 inclusive")
         exit()
 
+except IndexError:
+        print("ERROR - Server takes exactly one argument")
+        exit()
+
 
 def create_initial_response(message_response, num_items, more_msgs):
         """returns the basic packet header for a read request

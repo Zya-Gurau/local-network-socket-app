@@ -15,24 +15,6 @@ import sys
 #the dict used to store Client messages
 messages = dict()
 
-#gets the prt number from command lines arguments and check if its valid
-try:
-        port = int(sys.argv[1]) # 50000
-        if port < 1024 or port > 64000:
-                raise ValueError()
-except TypeError:
-        print("ERROR - Port must be a number")
-        exit()
-
-except ValueError:
-        print("ERROR - Port must be between 1024 and 64000 inclusive")
-        exit()
-
-except IndexError:
-        print("ERROR - Server takes exactly one argument")
-        exit()
-
-
 def create_initial_response(message_response, num_items, more_msgs):
         """returns the basic packet header for a read request
         
@@ -310,7 +292,30 @@ def server_loop(s):
                 c.close()
                 exit()
 
+def process_argv():
+        #gets the prt number from command lines arguments and check if its valid
+        try:
+                port = int(sys.argv[1]) # 50000
+                if port < 1024 or port > 64000:
+                        raise ValueError()
+                
+                return port
+        except TypeError:
+                print("ERROR - Port must be a number")
+                exit()
+
+        except ValueError:
+                print("ERROR - Port must be between 1024 and 64000 inclusive")
+                exit()
+
+        except IndexError:
+                print("ERROR - Server takes exactly one argument")
+                exit()
+
 def main():
+
+        port = process_argv()
+
         try:
                 
                 # server socket is created

@@ -131,7 +131,7 @@ def read_request(name_len, req_array, s, c):
                 message_response (bytearray): The bytearray containing the message response
         """
 
-        sen_name = get_name(req_array, 7, 7+name_len, s, c)
+        sen_name = get_name(req_array, 0, name_len, s, c)
         num_items, message_response = create_response_message(sen_name, s, c)   
         return sen_name, num_items, message_response
 
@@ -197,10 +197,10 @@ def create_request(req_array, name_len, receiver_len,s,c):
                 rec_name (str): The name of the reciever
         """
         
-        rec_name = get_name(req_array, 7+name_len, 7+receiver_len+name_len,s,c)
-        send_name = get_name(req_array, 7, 7+name_len,s,c)
+        rec_name = get_name(req_array, name_len, receiver_len+name_len,s,c)
+        send_name = get_name(req_array, 0, name_len,s,c)
           
-        dec_mes = get_message(req_array, name_len + receiver_len + 7, len(req_array))
+        dec_mes = get_message(req_array, name_len + receiver_len, len(req_array))
     
         # stores the recieved message under the intended recievers name
         if rec_name not in messages.keys():
@@ -227,17 +227,17 @@ def server_loop(s):
                 c.settimeout(1)
                 print ('Got connection from', addr )
                 
-                # recieves a message request from the connection socket
-                message_req = c.recv()
+                # recieve the first three bytes from the connection socket
+                message_req = c.recv(7)
                 req_array = bytearray(message_req)
                 
-                # uses bitwise operations on the bytearray to exract the header data
+                # uses bitwise operations on the byte data to extract the "magic" number and request ID
                 magic_no = req_array[0]<<8 | req_array[1]
                 r_id = req_array[2]
                 name_len = req_array[3]
                 receiver_len = req_array[4]
                 message_len = req_array[5]<<8 | req_array[6]
-                
+
                 # checks the validity of the recieved data
                 if magic_no != 0xAE73:
                         raise ValueError("magic number incorrect")
@@ -250,8 +250,12 @@ def server_loop(s):
                 if (r_id == 1 and message_len != 0) or (r_id == 2 and message_len < 1):
                         raise ValueError("message length incorrect")  
 
+                message_req = c.recv(name_len + receiver_len + message_len)
+                req_array = bytearray(message_req)
+
                 # if it's a create request
                 if r_id == 2:
+                        
                         send_name, rec_name = create_request(req_array, name_len, receiver_len,s,c)
                         print(send_name + " has created a message for " + rec_name)
                         c.close()
@@ -259,6 +263,8 @@ def server_loop(s):
                 
                 # if it's a read request
                 if r_id == 1:
+
+
                         sen_name, num_items, message_response = read_request(name_len, req_array, s, c)
 
                         # if messages are sent info message is printed and the sent messages are removed form
@@ -279,6 +285,7 @@ def server_loop(s):
                         # closes the connection socket
                         c.close()     
                         return None   
+                
         except OSError as err:
                 print("ERROR -  " + str(err))
                 c.close()

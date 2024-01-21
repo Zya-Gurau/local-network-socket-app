@@ -11,6 +11,7 @@ Student Number: 64646853
 
 from socket import *
 import sys
+from common import MessageRequest
 
 def get_response(s):
     """Gets a message response from the server
@@ -186,34 +187,21 @@ def create_request_main(s, name, address):
         print("ERROR - could not encode")
         s.close()
         exit()
-        
-    message_request = bytearray()
-    message_request.append(0xAE)
-    message_request.append(0x73)
-
-    message_request.append(0x2)
-    message_request.append(len(name_bytes))
-    message_request.append(len(rec_name_bytes))
-    message_request.append(len(message_bytes)>>8)
-    message_request.append(0xff & len(message_bytes)) 
-
-    for byte in name_bytes:
-        message_request.append(byte)
-
-    for byte in rec_name_bytes:
-        message_request.append(byte)
-        
-    for byte in message_bytes:
-        message_request.append(byte)
+    
+    message_request = MessageRequest(2, len(name_bytes), len(rec_name_bytes), len(message_bytes)) 
+    message_request.add_name(name_bytes)
+    message_request.add_reciever_name(rec_name_bytes)
+    message_request.add_message(message_bytes)
 
     try:
         s.settimeout(1)
         s.connect(address)  
-        s.send(message_request)
+        s.send(message_request.content)
 
         print("Message for " + rec_name + " Created")
 
         return None
+    
     except TimeoutError:
         print("ERROR - Server timed out")
         s.close()
@@ -238,24 +226,14 @@ def read_request_main(s, name, address):
 
 
     message_request = bytearray()
-    message_request.append(0xAE)
-    message_request.append(0x73)
-
-    message_request.append(0x1)
-    message_request.append(len(name_bytes))
-    message_request.append(0x0)    
-    message_request.append(0x0)
-    message_request.append(0x0)  
-
-    for byte in name_bytes:
-        message_request.append(byte)
-    
+    message_request = MessageRequest(1, len(name_bytes), 0, 0)
+    message_request.add_name(name_bytes)
     
     try:
         #connects to server and sends request
         s.settimeout(1)
         s.connect(address)  
-        s.send(message_request)
+        s.send(message_request.content)
         return None
     except TimeoutError:
         print("ERROR - Server timed out")

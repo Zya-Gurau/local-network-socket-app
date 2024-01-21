@@ -6,7 +6,6 @@ which is then stored in the server, a 'read' request gets the server to
 send the Client all the messages addressed to them.
 
 Author: Zya Gurau
-Student Number: 64646853
 """
 
 from socket import *

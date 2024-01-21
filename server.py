@@ -6,11 +6,11 @@ Using a 'read' request a Client can get the server to send them up to 255 of the
 for them by the server.
 
 Name: Zya Gurau
-Student Number: 64646853
 """
 
 from socket import *   
 import sys
+from common import MessageResponse
 
 #the dict used to store Client messages
 messages = dict()
@@ -60,15 +60,10 @@ def add_messages(message_response, items, num_items, s, c):
                 
                         sender_bytes = items[i][0].encode("utf-8")
                                         
-                        message_response.append(len(sender_bytes))
-                        message_response.append(len(message_bytes)>>8)
-                        message_response.append(0xff & len(message_bytes)) 
-                        
-                        for byte in sender_bytes:
-                                message_response.append(byte)
-                        for byte in message_bytes:
-                                message_response.append(byte)
+                        message_response.add_message(sender_bytes, message_bytes)
+
                 return message_response
+        
         except UnicodeEncodeError:
                 print("ERROR - could not encode message")
                 c.close()
@@ -108,12 +103,12 @@ def create_response_message(sen_name, s, c):
                         more_msgs = 0
                         num_items = 0 
 
-                message_response = create_initial_response(message_response, num_items, more_msgs)    
+                message_response = MessageResponse(num_items, more_msgs)    
                 message_response = add_messages(message_response, items, num_items, s, c)    
 
         # generats a packet header indicating there no messages stored for the client           
         else:
-                message_response = create_initial_response(message_response, num_items, more_msgs)  
+                message_response = MessageResponse(num_items, more_msgs)   
         return num_items, message_response
 
 def read_request(name_len, req_array, s, c):
@@ -280,7 +275,7 @@ def server_loop(s):
                         else:
                                 print("no messages sent")      
                         # sends a message response via the connection socket
-                        c.send(message_response)
+                        c.send(message_response.content)
                         # closes the connection socket
                         c.close()     
                         return None   

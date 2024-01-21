@@ -1,3 +1,7 @@
+""" Defines Classes used by Servers and Clients 
+
+Author: Zya Gurau
+"""
 
 class MessageRequest:
     def __init__(self, id, name_len, reciever_len, message_len):
@@ -28,3 +32,26 @@ class MessageRequest:
         for byte in message:
             self.content[self.index] = byte
             self.index += 1
+
+class MessageResponse:
+    def __init__(self, num_items, more_msgs):
+        self.content = bytearray(5)
+        self.content[0] = 0xAE
+        self.content[1] = 0x73
+        self.content[2] = 3
+        self.content[3] = num_items
+        self.content[4] = more_msgs
+
+    def add_message(self, sender_name, message):
+        self.content.append(len(sender_name))
+        self.content.append(len(message)>>8)
+        self.content.append(0xff & len(message)) 
+
+        for byte in sender_name:
+            self.content.append(byte)
+        for byte in message:
+            self.content.append(byte)
+
+
+
+        

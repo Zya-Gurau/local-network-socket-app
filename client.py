@@ -57,9 +57,7 @@ def get_response(s):
         
         for i in range(numitems):
             # recieves the next three bytes from the response
-            mes_res = s.recv(3)
-            req_array = bytearray(mes_res)
-
+            req_array = s.recv(3)
 
             sender_len = req_array[0]
             message_len = req_array[1]<<8 | req_array[2]
@@ -71,8 +69,7 @@ def get_response(s):
                 raise ValueError("Length of sender name must be at least 1 - Erroneous packet")
 
             # recieves the senders name and message date
-            mes_res = s.recv(sender_len + message_len)
-            req_array = bytearray(mes_res)
+            req_array = s.recv(sender_len + message_len)
 
             # gets the senders name by iterating through the bytearray based on the length
             # of the senders name

@@ -228,8 +228,8 @@ def server_loop(s):
                 print ('Got connection from', addr )
                 
                 # recieve the first three bytes from the connection socket
-                message_req = c.recv(7)
-                req_array = bytearray(message_req)
+                req_array = c.recv(7)
+                
                 
                 # uses bitwise operations on the byte data to extract the "magic" number and request ID
                 magic_no = req_array[0]<<8 | req_array[1]
@@ -250,8 +250,7 @@ def server_loop(s):
                 if (r_id == 1 and message_len != 0) or (r_id == 2 and message_len < 1):
                         raise ValueError("message length incorrect")  
 
-                message_req = c.recv(name_len + receiver_len + message_len)
-                req_array = bytearray(message_req)
+                req_array = c.recv(name_len + receiver_len + message_len)
 
                 # if it's a create request
                 if r_id == 2:

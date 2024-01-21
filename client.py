@@ -11,44 +11,6 @@ Student Number: 64646853
 
 from socket import *
 import sys
-try:
-    # gets values from the arguments on the command line and preforms validity checks on them
-
-    if len(sys.argv) != 5:
-         raise ValueError("Request must include exactly four parameters")
-    
-    filename = sys.argv[0] # "client.py"
-
-    port = int(sys.argv[2]) # 5000
-
-    if port < 1024 or port > 64000:
-                raise ValueError("Port must be between 1024 and 64000 inclusive")
-    
-    name = sys.argv[3] # "zya gurau"
-
-    if len(name) < 1 or len(name.encode("utf-8")) > 255:
-         raise ValueError("user name must be at least one character and less than 255 bytes")
-
-    type_rw = sys.argv[4] # "read"
-    
-    if type_rw != 'read' and type_rw != 'create':
-         raise ValueError("request muse be of type 'read' or 'create'")
-    
-    services = getaddrinfo(sys.argv[1], port, AF_INET, SOCK_STREAM)
-    family, type, proto, canonname, address = services[0]
-
-except gaierror:
-    print("ERROR - '{argv[1]}' does not exist")
-    exit()
-
-except ValueError as err:
-    print("ERROR -  " + str(err))
-    exit()
-
-except IndexError:
-    print("ERROR - Request must include exactly four parameters")
-    exit()
-
 
 def get_response(s):
     """Gets a message response from the server
@@ -204,7 +166,7 @@ def get_input(s):
         s.close()
         exit()
 
-def create_request_main(s):
+def create_request_main(s, name, address):
     """puts together a create request and sends it to the server
     
     Encodes data and appends it to a byte array which is then sent to the server,
@@ -251,6 +213,9 @@ def create_request_main(s):
         s.settimeout(1)
         s.connect(address)  
         s.send(message_request)
+
+        print("Message for " + rec_name + " Created")
+
         return None
     except TimeoutError:
         print("ERROR - Server timed out")
@@ -261,7 +226,7 @@ def create_request_main(s):
         s.close()
         exit()
 
-def read_request_main(s):
+def read_request_main(s, name, address):
     """Puts together a read request and sends it to the server 
     
     Args:
@@ -304,18 +269,61 @@ def read_request_main(s):
         s.close()
         exit()
 
+def process_argv():
+    try:
+        # gets values from the arguments on the command line and preforms validity checks on them
+
+        if len(sys.argv) != 5:
+            raise ValueError("Request must include exactly four parameters")
+        
+        filename = sys.argv[0] # "client.py"
+
+        port = int(sys.argv[2]) # 5000
+
+        if port < 1024 or port > 64000:
+                    raise ValueError("Port must be between 1024 and 64000 inclusive")
+        
+        name = sys.argv[3] # "zya gurau"
+
+        if len(name) < 1 or len(name.encode("utf-8")) > 255:
+            raise ValueError("user name must be at least one character and less than 255 bytes")
+
+        type_rw = sys.argv[4] # "read"
+        
+        if type_rw != 'read' and type_rw != 'create':
+            raise ValueError("request muse be of type 'read' or 'create'")
+        
+        services = getaddrinfo(sys.argv[1], port, AF_INET, SOCK_STREAM)
+        family, type, proto, canonname, address = services[0]
+
+        return port, name, type_rw, address
+
+    except gaierror:
+        print("ERROR - '{argv[1]}' does not exist")
+        exit()
+
+    except ValueError as err:
+        print("ERROR -  " + str(err))
+        exit()
+
+    except IndexError:
+        print("ERROR - Request must include exactly four parameters")
+        exit()
+
 def main():
     """Sets up read and create requests from the Client"""
+
+    port, name, type_rw, address = process_argv()
 
     #creates the main socket
     s = socket(AF_INET, SOCK_STREAM)
     # handles read request
     if type_rw == 'read':
-        read_request_main(s)
+        read_request_main(s, name, address)
         get_response(s)
     # handles create request
     elif type_rw == 'create':
-        create_request_main(s)
+        create_request_main(s, name, address)
     s.close()
 
 

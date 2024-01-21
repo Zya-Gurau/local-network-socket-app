@@ -89,7 +89,6 @@ def add_messages(message_response, items, num_items, s, c):
                 return message_response
         except UnicodeEncodeError:
                 print("ERROR - could not encode message")
-                s.close
                 c.close()
                 exit()
 
@@ -181,7 +180,6 @@ def get_name(req_array, range_val_one, range_val_two, s, c):
         except UnicodeDecodeError:
                 print("ERROR - could not decode")
                 c.close()
-                s.close()
                 exit()
 
 def get_message(req_array, range_val_one, range_val_two):
@@ -248,7 +246,7 @@ def server_loop(s):
                 print ('Got connection from', addr )
                 
                 # recieves a message request from the connection socket
-                message_req = c.recv(66052)
+                message_req = c.recv()
                 req_array = bytearray(message_req)
                 
                 # uses bitwise operations on the bytearray to exract the header data
@@ -302,24 +300,15 @@ def server_loop(s):
         except OSError as err:
                 print("ERROR -  " + str(err))
                 c.close()
-                s.close()
                 exit()
         except TimeoutError:
                 print("ERROR - timed out")
                 c.close()
-                s.close()
                 exit()
         except ValueError as err:
                 print("ERROR -  " + str(err))
                 c.close()
-                s.close()
                 exit()
-
-#DELETE THIS BEFORE SUBMISSION
-def test():
-        test_array = bytearray()
-
-        pass
 
 def main():
         try:

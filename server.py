@@ -324,7 +324,7 @@ def main():
                 # socket is bound to a given port and an ip address "0.0.0.0" is used 
                 # to bind to all local interfaces    
                 s.bind(('0.0.0.0', port))        
-                print ("socket binded to %s" %(port))
+                print ("socket bound to %s" %(port))
 
                 #Listen for connection requests
                 s.listen()    

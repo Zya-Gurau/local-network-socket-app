@@ -33,6 +33,58 @@ class MessageRequest:
             self.content[self.index] = byte
             self.index += 1
 
+class MessageKeys:
+    def __init__(self, num_items, more_msgs):
+        self.content = bytearray(5)
+        self.content[0] = 0xAE
+        self.content[1] = 0x73
+        self.content[2] = 6
+        self.content[3] = num_items
+        self.content[4] = more_msgs
+
+    def add_message(self, name, n, e):
+        self.content.append(len(name))
+        self.content.append(len(e))
+        self.content.append(len(n)>>8)
+        self.content.append(0xff & len(n)) 
+
+        for byte in name:
+            self.content.append(byte)
+        for byte in e:
+            self.content.append(byte)
+        for byte in n:
+            self.content.append(byte)
+        
+class MessageRegister:
+    def __init__(self, name_len, reciever_len, message_len):
+        self.index = 7
+        self.name_len = name_len
+        self.receiver_len = reciever_len
+        self.message_len = message_len
+        self.content = bytearray(7 + name_len + reciever_len + message_len)
+        self.content[0] = 0xAE
+        self.content[1] = 0x73
+        self.content[2] = 4
+        self.content[3] = name_len
+        self.content[4] = reciever_len
+        self.content[5] = message_len >> 8
+        self.content[6] = 0xff & message_len
+
+    def add_name(self, name):
+        for byte in name:
+            self.content[self.index] = byte
+            self.index += 1
+    
+    def add_reciever_name(self, name):
+        for byte in name:
+            self.content[self.index] = byte
+            self.index += 1
+    
+    def add_message(self, message):
+        for byte in message:
+            self.content[self.index] = byte
+            self.index += 1
+
 class MessageResponse:
     def __init__(self, num_items, more_msgs):
         self.content = bytearray(5)
@@ -51,7 +103,5 @@ class MessageResponse:
             self.content.append(byte)
         for byte in message:
             self.content.append(byte)
-
-
 
         
